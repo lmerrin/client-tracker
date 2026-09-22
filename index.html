@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#171814">
+  <meta name="description" content="A private, browser-based client project tracker for Webby Wahine.">
+  <title>Webby Wahine Client Tracker</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="app-header">
+    <a class="brand" href="#main" aria-label="Webby Wahine client tracker home">
+      <span class="brand-mark" aria-hidden="true">WW</span>
+      <span><strong>Webby Wahine</strong><small>Client tracker</small></span>
+    </a>
+    <div class="header-actions">
+      <button class="button button-secondary" id="exportBtn" type="button">Export backup</button>
+      <label class="button button-secondary file-button" for="importInput">Import backup</label>
+      <input id="importInput" type="file" accept="application/json,.json" hidden>
+      <button class="button button-primary" id="addClientBtn" type="button">Add client</button>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="dashboard" aria-labelledby="dashboardTitle">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Weekly view</p>
+          <h1 id="dashboardTitle">What needs your attention?</h1>
+        </div>
+        <p class="storage-note"><span aria-hidden="true">●</span> Saved on this device</p>
+      </div>
+
+      <div class="metrics" aria-label="Project summary">
+        <article class="metric"><span>Active</span><strong id="activeCount">0</strong></article>
+        <article class="metric"><span>Waiting on client</span><strong id="waitingCount">0</strong></article>
+        <article class="metric"><span>High priority</span><strong id="priorityCount">0</strong></article>
+        <article class="metric"><span>Follow-ups due</span><strong id="followupCount">0</strong></article>
+      </div>
+    </section>
+
+    <section class="workspace" aria-labelledby="projectsTitle">
+      <div class="workspace-topline">
+        <div>
+          <p class="eyebrow">Client projects</p>
+          <h2 id="projectsTitle">All projects</h2>
+        </div>
+        <p class="result-count" id="resultCount">0 clients</p>
+      </div>
+
+      <div class="filters" aria-label="Filter clients">
+        <label class="search-field">
+          <span class="sr-only">Search clients</span>
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m21 21-4.35-4.35m2.35-5.15A7.5 7.5 0 1 1 4 11.5a7.5 7.5 0 0 1 15 0Z"/></svg>
+          <input id="searchInput" type="search" placeholder="Search clients or next actions">
+        </label>
+        <label><span class="sr-only">Filter by status</span><select id="statusFilter"><option value="">All statuses</option></select></label>
+        <label><span class="sr-only">Filter by priority</span><select id="priorityFilter"><option value="">All priorities</option><option>High</option><option>Medium</option><option>Low</option></select></label>
+        <label class="archive-toggle"><input id="archiveToggle" type="checkbox"> Show archived</label>
+      </div>
+
+      <div id="emptyState" class="empty-state" hidden>
+        <div class="empty-icon" aria-hidden="true">+</div>
+        <h3>No client projects yet</h3>
+        <p>Add your first client, or import a backup from another device.</p>
+        <button class="button button-primary" id="emptyAddBtn" type="button">Add first client</button>
+      </div>
+
+      <div id="clientGrid" class="client-grid" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <dialog id="clientDialog" class="client-dialog">
+    <form id="clientForm" method="dialog">
+      <div class="dialog-header">
+        <div>
+          <p class="eyebrow">Project details</p>
+          <h2 id="dialogTitle">Add client</h2>
+        </div>
+        <button class="icon-button" id="closeDialogBtn" type="button" aria-label="Close">×</button>
+      </div>
+
+      <input id="clientId" type="hidden">
+      <div class="form-grid">
+        <label class="field field-span-2">Client or business name<input id="name" required maxlength="100"></label>
+        <label class="field">Contact name<input id="contact" maxlength="100"></label>
+        <label class="field">Project type<input id="projectType" maxlength="100" placeholder="Custom website"></label>
+        <label class="field">Stage<select id="stage"></select></label>
+        <label class="field">Status<select id="status"></select></label>
+        <label class="field">Priority<select id="priority"><option>High</option><option selected>Medium</option><option>Low</option></select></label>
+        <label class="field">Waiting on client?<select id="waiting"><option value="false">No</option><option value="true">Yes</option></select></label>
+        <label class="field field-span-2 progress-field">Progress <output id="progressOutput">0%</output><input id="progress" type="range" min="0" max="100" step="5" value="0"></label>
+        <label class="field field-span-2">Client deliverables or decisions needed<textarea id="deliverables" rows="3"></textarea></label>
+        <label class="field field-span-2">Your next action<textarea id="nextAction" rows="3"></textarea></label>
+        <label class="field">Preview or live URL<input id="url" type="url" placeholder="https://"></label>
+        <label class="field">Hosting or domain<input id="hosting" maxlength="150"></label>
+        <label class="field">Payment status<select id="payment"></select></label>
+        <label class="field">Care plan<select id="carePlan"></select></label>
+        <label class="field">Last contact<input id="lastContact" type="date"></label>
+        <label class="field">Next follow-up<input id="nextFollowup" type="date"></label>
+        <label class="field">Target launch<input id="targetLaunch" type="date"></label>
+        <label class="field field-span-2">Notes<textarea id="notes" rows="3"></textarea></label>
+      </div>
+
+      <div class="dialog-actions">
+        <button class="button button-danger" id="archiveBtn" type="button" hidden>Archive</button>
+        <span class="action-spacer"></span>
+        <button class="button button-secondary" id="cancelBtn" type="button">Cancel</button>
+        <button class="button button-primary" type="submit">Save client</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
